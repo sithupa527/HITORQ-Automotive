@@ -1,14 +1,30 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { NextRequest } from "next/server";
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        await prisma.appointment.delete({
+            where: { id: params.id },
+        });
 
-interface RouteParams {
-    params: {
-        id: string;
-    };
+        return NextResponse.json(
+            { message: "Appointment deleted successfully" },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error deleting appointment:", error);
+        return NextResponse.json(
+            { error: "Failed to delete appointment" },
+            { status: 500 }
+        );
+    }
 }
-
-export async function PATCH(req: NextRequest, { params }: RouteParams) {
+export async function PATCH(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
     try {
         const { status } = await req.json();
 
@@ -30,25 +46,6 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
         console.error("Error updating appointment:", error);
         return NextResponse.json(
             { error: "Failed to update appointment" },
-            { status: 500 }
-        );
-    }
-}
-
-export async function DELETE(req: NextRequest, { params }: RouteParams) {
-    try {
-        await prisma.appointment.delete({
-            where: { id: params.id },
-        });
-
-        return NextResponse.json(
-            { message: "Appointment deleted successfully" },
-            { status: 200 }
-        );
-    } catch (error) {
-        console.error("Error deleting appointment:", error);
-        return NextResponse.json(
-            { error: "Failed to delete appointment" },
             { status: 500 }
         );
     }
