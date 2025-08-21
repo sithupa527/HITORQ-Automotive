@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { NextRequest } from "next/server";
 
-export async function PATCH(
-    req: Request,
-    { params }: { params: { id: string } }
-) {
+interface RouteParams {
+    params: {
+        id: string;
+    };
+}
+
+export async function PATCH(req: NextRequest, { params }: RouteParams) {
     try {
         const { status } = await req.json();
 
@@ -31,11 +35,7 @@ export async function PATCH(
     }
 }
 
-// 🗑️ NEW: DELETE handler
-export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
     try {
         await prisma.appointment.delete({
             where: { id: params.id },
