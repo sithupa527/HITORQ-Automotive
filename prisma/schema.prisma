@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String?
+  address      String?
+  email        String?       @unique
+  phoneNumber  String?
+  username     String?       @unique
+  password     String? // per your spec: phone number is the password (not secure for prod)
+  appointments Appointment[]
+  vehicles     Vehicle[]
+  createdAt    DateTime      @default(now())
+}
+
+model Vehicle {
+  id           String        @id @default(cuid())
+  regoNumber   String?
+  vinNumber    String?
+  type         String?
+  user         User          @relation(fields: [userId], references: [id])
+  userId       String
+  appointments Appointment[]
+}
+
+model Appointment {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // You can link to a Vehicle record OR store free text identifiers:
+  vehicleId String?
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  vehicleIdType  String? // "Rego" | "VIN"
+  vehicleIdValue String? // actual number
+
+  serviceType String
+  description String?
+  status      String  @default("ongoing") // ongoing | completed
+
+  // Scheduling window (3-hour jobs)
+  startAt DateTime
+  endAt   DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startAt])
+  @@index([status])
+}
